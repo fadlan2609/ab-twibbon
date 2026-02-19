@@ -14,7 +14,7 @@
         <div class="container">
             <div class="logo">
                 <i class="fas fa-magic"></i>
-                <span>TwibbonApp Amanah Bangsa</span>
+                <span>TwibbonApp</span>
             </div>
             <div class="nav-links">
                 <a href="index.html" class="active">Beranda</a>
@@ -35,7 +35,33 @@
                 </div>
             </div>
             <div class="hero-image animate-pop-in">
-                <img src="https://via.placeholder.com/500x400" alt="Twibbon Preview" id="hero-img">
+                <div class="hero-image-container">
+                    <!-- Gambar preview twibbon dengan efek -->
+                    <div class="preview-card">
+                        <div class="preview-overlay"></div>
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23667eea'/%3E%3Ccircle cx='200' cy='200' r='150' fill='%23764ba2' opacity='0.8'/%3E%3Ccircle cx='200' cy='200' r='100' fill='%23f093fb' opacity='0.6'/%3E%3Ctext x='200' y='200' font-family='Arial' font-size='24' fill='white' text-anchor='middle' dy='.3em'%3ETwibbon%3C/text%3E%3Ctext x='200' y='240' font-family='Arial' font-size='18' fill='white' text-anchor='middle'%3EApp%3C/text%3E%3C/svg%3E"
+                             alt="Twibbon Preview" 
+                             id="hero-img"
+                             class="floating">
+                        <div class="preview-badge">
+                            <i class="fas fa-check-circle"></i>
+                            <span>PNG Transparan</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Gambar tambahan untuk efek -->
+                    <div class="floating-images">
+                        <div class="float-icon icon-1">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <div class="float-icon icon-2">
+                            <i class="fas fa-sliders-h"></i>
+                        </div>
+                        <div class="float-icon icon-3">
+                            <i class="fas fa-download"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -51,6 +77,9 @@
                     </div>
                     <h3>1. Upload Template</h3>
                     <p>Upload twibbon yang sudah diedit dengan background transparan</p>
+                    <div class="feature-example">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Crect width='60' height='60' fill='%23667eea' opacity='0.2'/%3E%3Ctext x='30' y='35' font-family='Arial' font-size='10' fill='%23667eea' text-anchor='middle'%3EPNG%3C/text%3E%3C/svg%3E" alt="PNG">
+                    </div>
                 </div>
                 <div class="feature-card animate-slide-up" style="animation-delay: 0.2s">
                     <div class="feature-icon">
@@ -58,6 +87,9 @@
                     </div>
                     <h3>2. Dapatkan Link</h3>
                     <p>Bagikan link unik ke teman-temanmu</p>
+                    <div class="feature-example">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
                 </div>
                 <div class="feature-card animate-slide-up" style="animation-delay: 0.4s">
                     <div class="feature-icon">
@@ -65,7 +97,44 @@
                     </div>
                     <h3>3. Generate & Atur</h3>
                     <p>Upload foto, atur posisi, dan download hasilnya</p>
+                    <div class="feature-example">
+                        <i class="fas fa-arrows-alt"></i>
+                    </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimoni / Statistik -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item animate-pop-in">
+                    <div class="stat-number">1000+</div>
+                    <div class="stat-label">Twibbon Dibuat</div>
+                </div>
+                <div class="stat-item animate-pop-in" style="animation-delay: 0.2s">
+                    <div class="stat-number">5000+</div>
+                    <div class="stat-label">Foto Ter-generate</div>
+                </div>
+                <div class="stat-item animate-pop-in" style="animation-delay: 0.4s">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Gratis</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content animate-slide-up">
+                <h2>Siap Membuat Twibbon?</h2>
+                <p>Mulai sekarang dan bagikan ke teman-temanmu!</p>
+                <a href="login.html" class="btn btn-primary btn-large">
+                    <i class="fas fa-rocket"></i>
+                    Mulai Membuat
+                </a>
             </div>
         </div>
     </section>
