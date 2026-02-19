@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buat Twibbon - Twibbon App</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-magic"></i>
+                <span>TwibbonApp</span>
+            </div>
+            <div class="nav-links">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="create.html" class="active">Buat Twibbon</a>
+                <a href="#" id="logoutBtn">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Create Form -->
+    <section class="create-section">
+        <div class="container">
+            <div class="create-card animate-pop-in">
+                <h2>Buat Twibbon Baru</h2>
+                <p class="subtitle">Upload template twibbon dengan background transparan (PNG)</p>
+
+                <form id="createForm" class="create-form">
+                    <div class="form-group">
+                        <label for="twibbonName">Nama Twibbon</label>
+                        <input type="text" id="twibbonName" placeholder="Contoh: HUT RI ke-78" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="twibbonDescription">Deskripsi (Opsional)</label>
+                        <textarea id="twibbonDescription" placeholder="Deskripsikan twibbon ini..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Upload Template Twibbon (PNG Transparan)</label>
+                        <div class="upload-area" id="uploadArea">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Drag & drop file di sini atau klik untuk memilih</p>
+                            <p class="file-info">Format: PNG dengan background transparan</p>
+                            <input type="file" id="twibbonFile" accept="image/png" hidden>
+                        </div>
+                        <div id="previewContainer" style="display: none;">
+                            <img id="imagePreview" alt="Preview">
+                            <button type="button" class="btn btn-small" id="changeImageBtn">Ganti Gambar</button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-magic"></i>
+                        Buat Twibbon & Generate Link
+                    </button>
+                </form>
+
+                <div id="resultLink" class="result-link" style="display: none;">
+                    <h3>Link Twibbon Berhasil Dibuat!</h3>
+                    <div class="link-box">
+                        <input type="text" id="generatedLink" readonly>
+                        <button class="btn btn-small" id="copyLinkBtn">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <p class="link-note">Bagikan link ini ke teman-temanmu!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

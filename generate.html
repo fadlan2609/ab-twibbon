@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Generate Twibbon - Twibbon App</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-magic"></i>
+                <span>TwibbonApp</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Generate Section -->
+    <section class="generate-section">
+        <div class="container">
+            <div class="generate-card animate-pop-in">
+                <h2>Buat Twibbon-mu Sekarang!</h2>
+                
+                <div class="twibbon-info" id="twibbonInfo">
+                    <!-- Info twibbon akan ditampilkan di sini -->
+                </div>
+
+                <div class="generate-container">
+                    <!-- Kolom Kiri: Upload & Controls -->
+                    <div class="generate-left">
+                        <div class="upload-photo-area" id="uploadPhotoArea">
+                            <i class="fas fa-camera"></i>
+                            <p>Klik untuk upload fotomu</p>
+                            <input type="file" id="userPhoto" accept="image/*" hidden>
+                        </div>
+
+                        <div class="photo-controls" style="display: none;">
+                            <div class="control-group">
+                                <label>Geser untuk mengatur posisi:</label>
+                                <div class="position-controls">
+                                    <div class="slider-container">
+                                        <span>X:</span>
+                                        <input type="range" id="posX" min="-100" max="100" value="0" step="1">
+                                    </div>
+                                    <div class="slider-container">
+                                        <span>Y:</span>
+                                        <input type="range" id="posY" min="-100" max="100" value="0" step="1">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="control-group">
+                                <label>Zoom:</label>
+                                <input type="range" id="zoom" min="0.5" max="2" value="1" step="0.1">
+                            </div>
+
+                            <button class="btn btn-primary btn-block" id="downloadBtn">
+                                <i class="fas fa-download"></i>
+                                Download Hasil
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Kolom Kanan: Preview -->
+                    <div class="generate-right">
+                        <div class="preview-container">
+                            <div class="canvas-wrapper">
+                                <canvas id="previewCanvas"></canvas>
+                            </div>
+                            <p class="preview-note">Preview hasil twibbonmu</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
