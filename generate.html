@@ -81,5 +81,166 @@
 
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="js/main.js"></script>
+
+    <script type="module">
+import { getTwibbon, incrementDownloads } from './js/supabase.js'
+
+document.addEventListener('DOMContentLoaded', async function() {
+    const urlParams = new URLSearchParams(window.location.search)
+    const twibbonId = urlParams.get('id')
+    
+    if (!twibbonId) {
+        showError('ID Twibbon tidak ditemukan')
+        return
+    }
+    
+    // Tampilkan loading
+    document.getElementById('twibbonInfo').innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Memuat...</p>'
+    
+    try {
+        const twibbon = await getTwibbon(twibbonId)
+        
+        // Tampilkan info
+        document.getElementById('twibbonInfo').innerHTML = `
+            <h3>${escapeHtml(twibbon.name)}</h3>
+            <p>${escapeHtml(twibbon.description || '')}</p>
+            <small>
+                <i class="fas fa-eye"></i> ${twibbon.views || 0} dilihat • 
+                <i class="fas fa-download"></i> ${twibbon.downloads || 0} download
+            </small>
+        `
+        
+        // Setup canvas
+        setupCanvas(twibbon.image_url, twibbon.id)
+        
+    } catch (error) {
+        showError('Gagal memuat: ' + error.message)
+    }
+})
+
+function showError(message) {
+    document.querySelector('.generate-card').innerHTML = `
+        <h2>❌ Error</h2>
+        <p>${message}</p>
+        <a href="index.html" class="btn btn-primary">Kembali ke Beranda</a>
+    `
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div')
+    div.textContent = text
+    return div.innerHTML
+}
+
+function setupCanvas(imageUrl, twibbonId) {
+    const canvas = document.getElementById('previewCanvas')
+    const ctx = canvas.getContext('2d')
+    
+    const twibbonImg = new Image()
+    twibbonImg.crossOrigin = 'anonymous'
+    twibbonImg.src = imageUrl
+    
+    let userImg = null
+    let userImgElement = null
+    
+    // Upload photo area
+    const uploadPhotoArea = document.getElementById('uploadPhotoArea')
+    const userPhoto = document.getElementById('userPhoto')
+    const photoControls = document.querySelector('.photo-controls')
+    
+    userPhoto.addEventListener('change', (e) => {
+        const file = e.target.files[0]
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Foto terlalu besar! Maksimal 5MB')
+                return
+            }
+            
+            const reader = new FileReader()
+            reader.onload = function(e) {
+                userImg = new Image()
+                userImg.src = e.target.result
+                userImg.onload = function() {
+                    userImgElement = userImg
+                    uploadPhotoArea.style.display = 'none'
+                    photoControls.style.display = 'block'
+                    drawPreview()
+                }
+            }
+            reader.readAsDataURL(file)
+        }
+    })
+    
+    uploadPhotoArea.addEventListener('click', () => {
+        userPhoto.click()
+    })
+    
+    // Position controls
+    let posX = 0, posY = 0, zoom = 1
+    
+    document.getElementById('posX').addEventListener('input', (e) => {
+        posX = parseInt(e.target.value)
+        drawPreview()
+    })
+    
+    document.getElementById('posY').addEventListener('input', (e) => {
+        posY = parseInt(e.target.value)
+        drawPreview()
+    })
+    
+    document.getElementById('zoom').addEventListener('input', (e) => {
+        zoom = parseFloat(e.target.value)
+        drawPreview()
+    })
+    
+    function drawPreview() {
+        if (!twibbonImg.complete || (userImgElement && !userImgElement.complete)) {
+            setTimeout(drawPreview, 100)
+            return
+        }
+        
+        canvas.width = twibbonImg.width
+        canvas.height = twibbonImg.height
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        
+        if (userImgElement) {
+            const scaledWidth = userImgElement.width * zoom
+            const scaledHeight = userImgElement.height * zoom
+            
+            const x = (canvas.width - scaledWidth) / 2 + posX
+            const y = (canvas.height - scaledHeight) / 2 + posY
+            
+            ctx.drawImage(userImgElement, x, y, scaledWidth, scaledHeight)
+        }
+        
+        ctx.drawImage(twibbonImg, 0, 0, canvas.width, canvas.height)
+    }
+    
+    twibbonImg.onload = () => {
+        drawPreview()
+    }
+    
+    // Download button
+    document.getElementById('downloadBtn').addEventListener('click', async function() {
+        if (!userImgElement) {
+            alert('Harap upload foto terlebih dahulu!')
+            return
+        }
+        
+        // Increment downloads di Supabase
+        await incrementDownloads(twibbonId)
+        
+        // Download image
+        const link = document.createElement('a')
+        link.download = `twibbon-${Date.now()}.png`
+        link.href = canvas.toDataURL('image/png')
+        link.click()
+        
+        alert('✅ Foto berhasil didownload!')
+    })
+}
+</script>
 </body>
+
 </html>
