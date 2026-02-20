@@ -83,148 +83,201 @@
     <script src="js/main.js"></script>
 
  <script type="module">
-    import { getTwibbon, incrementDownloads } from './js/supabase.js'
+import { getTwibbon, incrementDownloads } from './js/supabase.js'
+
+// FUNGSI BARU: Tunggu element sampai benar-benar ada
+function waitForElement(selector, timeout = 5000) {
+    return new Promise((resolve, reject) => {
+        const startTime = Date.now()
+        
+        const checkElement = () => {
+            const element = document.querySelector(selector)
+            if (element) {
+                console.log(`✅ Element ${selector} ditemukan!`)
+                resolve(element)
+            } else if (Date.now() - startTime >= timeout) {
+                reject(new Error(`❌ Element ${selector} tidak ditemukan dalam ${timeout}ms`))
+            } else {
+                console.log(`⏳ Menunggu element ${selector}...`)
+                setTimeout(checkElement, 100)
+            }
+        }
+        
+        checkElement()
+    })
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('✅ 1. DOM sudah siap')
     
-    // PASTIKAN kode ini dijalankan SETELAH semua element siap
-    document.addEventListener('DOMContentLoaded', async function() {
-        console.log('✅ 1. DOM sudah siap')
+    try {
+        // TUNGGU element twibbonInfo sampai benar-benar ada
+        const twibbonInfo = await waitForElement('#twibbonInfo')
+        console.log('✅ 2. Element twibbonInfo ditemukan:', twibbonInfo)
         
-        // Tunggu sebentar untuk memastikan semua element ter-render
-        await new Promise(resolve => setTimeout(resolve, 100))
+        // Baru setelah itu set innerHTML
+        twibbonInfo.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Memuat data...</p>'
+        console.log('✅ 3. Loading ditampilkan')
         
-        const twibbonInfo = document.getElementById('twibbonInfo')
-        console.log('✅ 2. Element twibbonInfo:', twibbonInfo)
+        const urlParams = new URLSearchParams(window.location.search)
+        const twibbonId = urlParams.get('id')
+        console.log('✅ 4. ID dari URL:', twibbonId)
         
-        if (!twibbonInfo) {
-            console.error('❌ Element twibbonInfo masih tidak ditemukan!')
-            // Coba cari semua element yang ada
-            console.log('Semua element dengan class twibbon-info:', document.querySelectorAll('.twibbon-info'))
+        if (!twibbonId) {
+            twibbonInfo.innerHTML = '<p>❌ ID tidak ditemukan di URL</p>'
             return
         }
         
-        // Tampilkan loading
-        twibbonInfo.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Memuat data...</p>'
+        console.log('✅ 5. Mencari twibbon dengan ID:', twibbonId)
+        const twibbon = await getTwibbon(twibbonId)
+        console.log('✅ 6. Data twibbon ditemukan:', twibbon)
         
-        try {
-            const urlParams = new URLSearchParams(window.location.search)
-            const twibbonId = urlParams.get('id')
-            
-            if (!twibbonId) {
-                twibbonInfo.innerHTML = '<p>❌ ID tidak ditemukan</p>'
-                return
-            }
-            
-            console.log('Mencari ID:', twibbonId)
-            const twibbon = await getTwibbon(twibbonId)
-            
+        // Tampilkan info
+        twibbonInfo.innerHTML = `
+            <h3>${escapeHtml(twibbon.name)}</h3>
+            <p>${escapeHtml(twibbon.description || '')}</p>
+            <small>
+                <i class="fas fa-eye"></i> ${twibbon.views || 0} dilihat • 
+                <i class="fas fa-download"></i> ${twibbon.downloads || 0} download
+            </small>
+        `
+        console.log('✅ 7. Info ditampilkan')
+        
+        // Setup canvas
+        setupCanvas(twibbon.image_url, twibbon.id)
+        
+    } catch (error) {
+        console.error('❌ ERROR:', error)
+        
+        // Coba tampilkan error di element kalau ada
+        const twibbonInfo = document.querySelector('#twibbonInfo')
+        if (twibbonInfo) {
             twibbonInfo.innerHTML = `
-                <h3>${twibbon.name}</h3>
-                <p>${twibbon.description || ''}</p>
-                <small>
-                    👁️ ${twibbon.views || 0} • 
-                    ⬇️ ${twibbon.downloads || 0}
-                </small>
+                <h3 style="color: red;">❌ Gagal Memuat</h3>
+                <p>${error.message}</p>
+                <p style="font-size: 12px;">Cek console (F12) untuk detail</p>
             `
-            
-            // Setup canvas
-            setupCanvas(twibbon.image_url, twibbon.id)
-            
-        } catch (error) {
-            console.error('Error:', error)
-            twibbonInfo.innerHTML = `<p>❌ ${error.message}</p>`
+        } else {
+            // Kalau element masih belum ada, tampilkan alert
+            alert('Error: Element twibbonInfo tidak ditemukan!\n' + error.message)
+        }
+    }
+})
+
+function escapeHtml(text) {
+    if (!text) return ''
+    const div = document.createElement('div')
+    div.textContent = text
+    return div.innerHTML
+}
+
+function setupCanvas(imageUrl, twibbonId) {
+    console.log('🎨 Setup canvas dengan imageUrl:', imageUrl)
+    
+    const canvas = document.getElementById('previewCanvas')
+    const uploadPhotoArea = document.getElementById('uploadPhotoArea')
+    const userPhoto = document.getElementById('userPhoto')
+    const photoControls = document.querySelector('.photo-controls')
+    const downloadBtn = document.getElementById('downloadBtn')
+    
+    if (!canvas) {
+        console.error('❌ Canvas tidak ditemukan!')
+        return
+    }
+    
+    const ctx = canvas.getContext('2d')
+    const twibbonImg = new Image()
+    twibbonImg.crossOrigin = 'anonymous'
+    twibbonImg.src = imageUrl
+    
+    let userImg = null
+    
+    // Upload event
+    userPhoto.addEventListener('change', (e) => {
+        const file = e.target.files[0]
+        if (file) {
+            const reader = new FileReader()
+            reader.onload = function(e) {
+                userImg = new Image()
+                userImg.src = e.target.result
+                userImg.onload = function() {
+                    uploadPhotoArea.style.display = 'none'
+                    photoControls.style.display = 'block'
+                    drawPreview()
+                }
+            }
+            reader.readAsDataURL(file)
         }
     })
-
-    function setupCanvas(imageUrl, twibbonId) {
-        const canvas = document.getElementById('previewCanvas')
-        const ctx = canvas.getContext('2d')
-        const twibbonImg = new Image()
-        twibbonImg.crossOrigin = 'anonymous'
-        twibbonImg.src = imageUrl
-        
-        let userImg = null
-        
-        // Upload photo area
-        const uploadPhotoArea = document.getElementById('uploadPhotoArea')
-        const userPhoto = document.getElementById('userPhoto')
-        const photoControls = document.querySelector('.photo-controls')
-        
-        userPhoto.addEventListener('change', (e) => {
-            const file = e.target.files[0]
-            if (file) {
-                const reader = new FileReader()
-                reader.onload = function(e) {
-                    userImg = new Image()
-                    userImg.src = e.target.result
-                    userImg.onload = () => {
-                        uploadPhotoArea.style.display = 'none'
-                        photoControls.style.display = 'block'
-                        drawPreview()
-                    }
-                }
-                reader.readAsDataURL(file)
-            }
-        })
-        
-        uploadPhotoArea.addEventListener('click', () => userPhoto.click())
-        
-        // Controls
-        let posX = 0, posY = 0, zoom = 1
-        
-        document.getElementById('posX').addEventListener('input', (e) => {
-            posX = parseInt(e.target.value)
-            drawPreview()
-        })
-        
-        document.getElementById('posY').addEventListener('input', (e) => {
-            posY = parseInt(e.target.value)
-            drawPreview()
-        })
-        
-        document.getElementById('zoom').addEventListener('input', (e) => {
-            zoom = parseFloat(e.target.value)
-            drawPreview()
-        })
-        
-        function drawPreview() {
-            if (!twibbonImg.complete || (userImg && !userImg.complete)) {
-                setTimeout(drawPreview, 100)
-                return
-            }
-            
-            canvas.width = twibbonImg.width
-            canvas.height = twibbonImg.height
-            ctx.clearRect(0, 0, canvas.width, canvas.height)
-            
-            if (userImg) {
-                const scaledWidth = userImg.width * zoom
-                const scaledHeight = userImg.height * zoom
-                const x = (canvas.width - scaledWidth) / 2 + posX
-                const y = (canvas.height - scaledHeight) / 2 + posY
-                ctx.drawImage(userImg, x, y, scaledWidth, scaledHeight)
-            }
-            
-            ctx.drawImage(twibbonImg, 0, 0)
+    
+    uploadPhotoArea.addEventListener('click', () => userPhoto.click())
+    
+    // Controls
+    let posX = 0, posY = 0, zoom = 1
+    
+    document.getElementById('posX').addEventListener('input', (e) => {
+        posX = parseInt(e.target.value)
+        drawPreview()
+    })
+    
+    document.getElementById('posY').addEventListener('input', (e) => {
+        posY = parseInt(e.target.value)
+        drawPreview()
+    })
+    
+    document.getElementById('zoom').addEventListener('input', (e) => {
+        zoom = parseFloat(e.target.value)
+        drawPreview()
+    })
+    
+    function drawPreview() {
+        if (!twibbonImg.complete || (userImg && !userImg.complete)) {
+            setTimeout(drawPreview, 100)
+            return
         }
         
-        twibbonImg.onload = drawPreview
+        canvas.width = twibbonImg.width
+        canvas.height = twibbonImg.height
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
         
-        // Download
-        document.getElementById('downloadBtn').addEventListener('click', async () => {
-            if (!userImg) {
-                alert('Upload foto dulu!')
-                return
-            }
-            await incrementDownloads(twibbonId)
-            const link = document.createElement('a')
-            link.download = `twibbon-${Date.now()}.png`
-            link.href = canvas.toDataURL('image/png')
-            link.click()
-        })
+        if (userImg) {
+            const scaledWidth = userImg.width * zoom
+            const scaledHeight = userImg.height * zoom
+            const x = (canvas.width - scaledWidth) / 2 + posX
+            const y = (canvas.height - scaledHeight) / 2 + posY
+            ctx.drawImage(userImg, x, y, scaledWidth, scaledHeight)
+        }
+        
+        ctx.drawImage(twibbonImg, 0, 0)
     }
-    </script>
+    
+    twibbonImg.onload = () => {
+        console.log('✅ Gambar template loaded')
+        drawPreview()
+    }
+    
+    twibbonImg.onerror = (err) => {
+        console.error('❌ Gagal load gambar:', err)
+    }
+    
+    // Download
+    downloadBtn.addEventListener('click', async () => {
+        if (!userImg) {
+            alert('Upload foto dulu!')
+            return
+        }
+        await incrementDownloads(twibbonId)
+        const link = document.createElement('a')
+        link.download = `twibbon-${Date.now()}.png`
+        link.href = canvas.toDataURL('image/png')
+        link.click()
+        alert('✅ Download berhasil!')
+    })
+}
+</script>
 </body>
 
 </html>
+
 
 
