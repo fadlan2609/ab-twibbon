@@ -42,5 +42,68 @@
     </section>
 
     <script src="js/main.js"></script>
+
+    <script type="module">
+import { getAllTwibbons } from './js/supabase.js'
+
+document.addEventListener('DOMContentLoaded', async function() {
+    const twibbonList = document.getElementById('twibbonList')
+    
+    // Tampilkan loading
+    twibbonList.innerHTML = '<p class="no-data"><i class="fas fa-spinner fa-spin"></i> Memuat data...</p>'
+    
+    try {
+        const twibbons = await getAllTwibbons()
+        
+        if (twibbons.length === 0) {
+            twibbonList.innerHTML = '<p class="no-data">Belum ada twibbon yang dibuat. Buat twibbon pertama Anda!</p>'
+        } else {
+            twibbonList.innerHTML = twibbons.map(twibbon => `
+                <div class="twibbon-item animate-pop-in">
+                    <img src="${twibbon.image_url}" alt="${escapeHtml(twibbon.name)}" class="twibbon-preview" loading="lazy">
+                    <div class="twibbon-info">
+                        <h3>${escapeHtml(twibbon.name)}</h3>
+                        <p>${escapeHtml(twibbon.description || 'Tidak ada deskripsi')}</p>
+                        <div class="twibbon-meta">
+                            <span><i class="fas fa-eye"></i> ${twibbon.views || 0}</span>
+                            <span><i class="fas fa-download"></i> ${twibbon.downloads || 0}</span>
+                            <span><i class="fas fa-clock"></i> ${new Date(twibbon.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <div class="twibbon-link">
+                            <input type="text" value="${window.location.origin}/generate.html?id=${twibbon.id}" readonly>
+                            <button class="btn btn-small copy-link" data-link="${window.location.origin}/generate.html?id=${twibbon.id}">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('')
+            
+            // Copy link functionality
+            document.querySelectorAll('.copy-link').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const link = this.dataset.link
+                    navigator.clipboard.writeText(link)
+                    alert('✅ Link disalin!')
+                })
+            })
+        }
+    } catch (error) {
+        twibbonList.innerHTML = `
+            <p class="no-data error">
+                <i class="fas fa-exclamation-circle"></i>
+                Gagal memuat data: ${error.message}
+            </p>
+        `
+    }
+})
+
+function escapeHtml(text) {
+    const div = document.createElement('div')
+    div.textContent = text
+    return div.innerHTML
+}
+</script>
 </body>
+
 </html>
