@@ -77,5 +77,113 @@
     </section>
 
     <script src="js/main.js"></script>
+
+    <script type="module">
+import { createTwibbon } from './js/supabase.js'
+
+document.addEventListener('DOMContentLoaded', function() {
+    const createForm = document.getElementById('createForm')
+    const fileInput = document.getElementById('twibbonFile')
+    const uploadArea = document.getElementById('uploadArea')
+    const previewContainer = document.getElementById('previewContainer')
+    const imagePreview = document.getElementById('imagePreview')
+    const resultLink = document.getElementById('resultLink')
+    const generatedLink = document.getElementById('generatedLink')
+    
+    // Preview gambar
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0]
+        if (file) {
+            // Cek tipe file
+            if (!file.type.startsWith('image/')) {
+                alert('Harap upload file gambar!')
+                this.value = ''
+                return
+            }
+            
+            // Cek ukuran (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File terlalu besar! Maksimal 5MB')
+                this.value = ''
+                return
+            }
+            
+            const reader = new FileReader()
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result
+                uploadArea.style.display = 'none'
+                previewContainer.style.display = 'block'
+            }
+            reader.readAsDataURL(file)
+        }
+    })
+    
+    // Upload area click
+    uploadArea.addEventListener('click', () => {
+        fileInput.click()
+    })
+    
+    // Ganti gambar
+    document.getElementById('changeImageBtn')?.addEventListener('click', () => {
+        uploadArea.style.display = 'block'
+        previewContainer.style.display = 'none'
+        fileInput.value = ''
+    })
+    
+    // Submit form
+    createForm.addEventListener('submit', async function(e) {
+        e.preventDefault()
+        
+        const name = document.getElementById('twibbonName').value.trim()
+        const description = document.getElementById('twibbonDescription').value.trim()
+        const file = fileInput.files[0]
+        
+        if (!name) {
+            alert('Nama twibbon harus diisi!')
+            return
+        }
+        
+        if (!file) {
+            alert('Harap upload template twibbon!')
+            return
+        }
+        
+        // Tampilkan loading
+        const submitBtn = this.querySelector('button[type="submit"]')
+        const originalText = submitBtn.innerHTML
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...'
+        submitBtn.disabled = true
+        
+        try {
+            const result = await createTwibbon(name, description, file)
+            
+            // Generate link
+            const link = `${window.location.origin}/generate.html?id=${result.id}`
+            generatedLink.value = link
+            resultLink.style.display = 'block'
+            
+            // Reset form
+            createForm.reset()
+            uploadArea.style.display = 'block'
+            previewContainer.style.display = 'none'
+            
+            alert('✅ Twibbon berhasil dibuat!')
+        } catch (error) {
+            alert('❌ Gagal: ' + error.message)
+        } finally {
+            submitBtn.innerHTML = originalText
+            submitBtn.disabled = false
+        }
+    })
+    
+    // Copy link
+    document.getElementById('copyLinkBtn')?.addEventListener('click', function() {
+        generatedLink.select()
+        navigator.clipboard.writeText(generatedLink.value)
+        alert('Link disalin!')
+    })
+})
+</script>
 </body>
+
 </html>
